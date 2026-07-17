@@ -1,6 +1,6 @@
 ---
 name: vibe-label
-description: Generate a factual, privacy-aware, shareable code-change label from a local Git diff. Use when the user asks for a VibeLabel, code ingredients label, code nutrition label, visual diff facts, a share card for current/staged/branch changes, or an evidence-based Codex versus Claude Code change comparison. Reports change size, languages, direct dependency changes, test-file changes, verification results, sensitive areas, and explicit patterns on added lines without assigning a quality score or uploading source.
+description: Generate a factual, privacy-aware, shareable code-change label in English or Simplified Chinese from a local Git diff. Use when the user asks for a VibeLabel, code ingredients label, code nutrition label, visual diff facts, a Chinese code-change card, a share card for current/staged/branch changes, or an evidence-based Codex versus Claude Code change comparison. Reports change size, languages, direct dependency changes, test-file changes, verification results, sensitive areas, and explicit patterns on added lines without assigning a quality score or uploading source.
 ---
 
 # VibeLabel
@@ -16,10 +16,12 @@ Generate a self-contained local HTML label and a machine-readable JSON report wi
    - Explicit staged request: `--staged` for `HEAD` to index.
    - Explicit unstaged request: `--unstaged` for index to worktree, including untracked files.
    - Branch or PR request: `--base <ref>` for `merge-base(ref, HEAD)` to `HEAD`; local dirty changes are excluded.
-4. Run `node <skill-root>/scripts/vibe-label.mjs --repo <repo> <scope>`.
-5. Return the generated safe `index.html` path. Mention `detailed.html` and `report.json` separately and treat both as private local data.
+4. Select the presentation language. Use `--lang zh-CN` when the user asks in Chinese or explicitly requests a Chinese label; otherwise use the English default.
+5. Run `node <skill-root>/scripts/vibe-label.mjs --repo <repo> <scope> [--lang zh-CN]`.
+6. Return the generated safe `index.html` path. Mention `detailed.html` and `report.json` separately and treat both as private local data.
 
 The default output directory is outside the repository under the operating system's temporary directory. Use `--output <path>` only when the user asks for persistent files.
+Presentation language never changes `report.json`, its rule IDs, or the analysis fingerprint.
 
 ## Verification
 
@@ -60,6 +62,9 @@ node <skill-root>/scripts/vibe-label.mjs --repo <repo> --staged --open
 
 # Branch changes relative to main
 node <skill-root>/scripts/vibe-label.mjs --repo <repo> --base main
+
+# Current changes with a Simplified Chinese card and summary
+node <skill-root>/scripts/vibe-label.mjs --repo <repo> --current --lang zh-CN
 
 # CLI reference
 node <skill-root>/scripts/vibe-label.mjs --help

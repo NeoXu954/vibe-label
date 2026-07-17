@@ -8,9 +8,10 @@ import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { analyzeRepository, refreshFingerprint } from './lib/analyze.mjs';
 import { VibeLabelError, findRepositoryRoot } from './lib/git.mjs';
+import { DEFAULT_LOCALE, getCopy, normalizeLocale } from './lib/i18n.mjs';
 import { renderHtml } from './lib/render.mjs';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 function usage() {
   return `VibeLabel ${VERSION}
@@ -32,6 +33,7 @@ Other options:
   --check <L=C>        Run a verification command before analysis, e.g. BUILD=npm run build
                        Labels BUILD, TEST, and TYPES appear on the share card; repeatable
   --check-timeout <ms> Timeout per check (default: 120000)
+  --lang <locale>      Presentation language: en or zh-CN (default: en)
   --open               Open the generated HTML in the default browser
   --json               Print the machine report to stdout
   --help               Show this help
@@ -52,6 +54,7 @@ export function parseArguments(argv) {
     repository: process.cwd(),
     checks: [],
     checkTimeout: 120_000,
+    locale: DEFAULT_LOCALE,
     open: false,
     printJson: false,
   };
@@ -96,6 +99,12 @@ export function parseArguments(argv) {
       }
       options.checkTimeout = value;
       index += 1;
+    } else if (arg === '--lang') {
+      const value = takeValue(argv, index, arg);
+      const locale = normalizeLocale(value);
+      if (!locale) throw new VibeLabelError('E_ARGUMENT', '--lang supports en or zh-CN.');
+      options.locale = locale;
+      index += 1;
     } else if (arg === '--open') options.open = true;
     else if (arg === '--json') options.printJson = true;
     else if (arg === '--help' || arg === '-h') options.help = true;
@@ -135,8 +144,10 @@ function openFile(filePath) {
   child.unref();
 }
 
-function writeOutputs(root, report, requestedOutput) {
-  const output = path.resolve(requestedOutput ?? path.join(os.tmpdir(), 'vibe-label', report.fingerprint.value.slice(0, 12)));
+function writeOutputs(root, report, requestedOutput, locale) {
+  const fingerprintPath = path.join(os.tmpdir(), 'vibe-label', report.fingerprint.value.slice(0, 12));
+  const defaultOutput = locale === DEFAULT_LOCALE ? fingerprintPath : path.join(fingerprintPath, locale);
+  const output = path.resolve(requestedOutput ?? defaultOutput);
   mkdirSync(output, { recursive: true, mode: 0o700 });
   const reportPath = path.join(output, 'report.json');
   const htmlPath = path.join(output, 'index.html');
@@ -147,8 +158,8 @@ function writeOutputs(root, report, requestedOutput) {
     if (process.platform !== 'win32') chmodSync(filePath, 0o600);
   };
   writePrivate(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-  writePrivate(htmlPath, renderHtml(report, { mode: 'safe' }));
-  writePrivate(detailedHtmlPath, renderHtml(report, { mode: 'detailed' }));
+  writePrivate(htmlPath, renderHtml(report, { mode: 'safe', locale }));
+  writePrivate(detailedHtmlPath, renderHtml(report, { mode: 'detailed', locale }));
   return { output, reportPath, htmlPath, detailedHtmlPath, root };
 }
 
@@ -169,10 +180,19 @@ export function main(argv = process.argv.slice(2)) {
   analyzed.report.verification.results = verification;
   if (verification.length > 0) analyzed.report.tests.execution = verification.some((item) => item.label === 'TEST') ? 'run' : 'not-run';
   refreshFingerprint(analyzed.report);
-  const output = writeOutputs(root, analyzed.report, options.output);
+  const output = writeOutputs(root, analyzed.report, options.output, options.locale);
 
   if (options.printJson) console.log(JSON.stringify(analyzed.report, null, 2));
-  else {
+  else if (options.locale === 'zh-CN') {
+    const copy = getCopy(options.locale);
+    const scope = options.mode === 'base' ? copy.scopes.base : copy.scopes[options.mode];
+    console.log(`VibeLabel ${VERSION}`);
+    console.log(`范围:   ${scope}`);
+    console.log(`文件:   ${analyzed.report.summary.files.total}`);
+    console.log(`安全版: ${output.htmlPath}`);
+    console.log(`详细版: ${output.detailedHtmlPath}`);
+    console.log(`报告:   ${output.reportPath}`);
+  } else {
     console.log(`VibeLabel ${VERSION}`);
     console.log(`Scope:  ${analyzed.report.selection.mode}`);
     console.log(`Files:  ${analyzed.report.summary.files.total}`);

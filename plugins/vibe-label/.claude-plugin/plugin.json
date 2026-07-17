@@ -1,7 +1,7 @@
 {
   "name": "vibe-label",
-  "version": "0.1.0",
-  "description": "Generate a factual, shareable code-change label from a local Git diff.",
+  "version": "0.2.0",
+  "description": "Generate a factual code-change label in English or Simplified Chinese from a local Git diff.",
   "author": {
     "name": "NeoXu954"
   },

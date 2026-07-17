@@ -6,7 +6,9 @@ import path from 'node:path';
 import test from 'node:test';
 import { analyzeRepository } from '../plugins/vibe-label/skills/vibe-label/scripts/lib/analyze.mjs';
 import { parseNameStatusZ, parseNumstatZ } from '../plugins/vibe-label/skills/vibe-label/scripts/lib/git.mjs';
-import { renderHtml } from '../plugins/vibe-label/skills/vibe-label/scripts/lib/render.mjs';
+import { getCopy, normalizeLocale } from '../plugins/vibe-label/skills/vibe-label/scripts/lib/i18n.mjs';
+import { renderHtml, renderViews } from '../plugins/vibe-label/skills/vibe-label/scripts/lib/render.mjs';
+import { parseArguments } from '../plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs';
 
 function git(cwd, args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -41,6 +43,42 @@ test('parses NUL-delimited status and numstat records, including renames and bin
     { path: 'image.png', previousPath: undefined, additions: null, deletions: null },
     { path: 'new.ts', previousPath: 'old.ts', additions: 0, deletions: 0 },
   ]);
+});
+
+test('normalizes supported presentation languages and rejects unsupported values', () => {
+  assert.equal(normalizeLocale('en-US'), 'en');
+  assert.equal(normalizeLocale('ZH_cn'), 'zh-CN');
+  assert.equal(parseArguments(['--lang', 'zh']).locale, 'zh-CN');
+  assert.equal(parseArguments([]).locale, 'en');
+  assert.throws(
+    () => parseArguments(['--lang', 'fr']),
+    (error) => error.code === 'E_ARGUMENT' && /en or zh-CN/.test(error.message),
+  );
+});
+
+test('bundled Chinese font subset tracks every fixed zh-CN presentation character', () => {
+  const values = [];
+  const collect = (value) => {
+    if (typeof value === 'string') values.push(value);
+    else if (typeof value === 'function') values.push(String(value(1)));
+    else if (value && typeof value === 'object') Object.values(value).forEach(collect);
+  };
+  collect(getCopy('zh-CN'));
+  const subset = new Set(Array.from(readFileSync(
+    'plugins/vibe-label/skills/vibe-label/assets/fonts/NotoSansSC-subset-chars.txt',
+    'utf8',
+  )));
+  const required = new Set(Array.from(values.join('')).filter((character) => (
+    /\p{Script=Han}|[\u3000-\u303F\uFF00-\uFFEF]/u.test(character)
+  )));
+  assert.deepEqual([...required].filter((character) => !subset.has(character)), []);
+});
+
+test('Chinese documentation sample keeps the export dimensions', () => {
+  const png = readFileSync('docs/vibelabel-sample.zh-CN.png');
+  assert.equal(png.subarray(1, 4).toString('ascii'), 'PNG');
+  assert.equal(png.readUInt32BE(16), 1080);
+  assert.equal(png.readUInt32BE(20), 1350);
 });
 
 test('default current scope includes staged, unstaged, and untracked changes', () => {
@@ -163,6 +201,54 @@ test('renders a self-contained local HTML label without absolute repository path
   assert.equal(html.includes('source code uploaded'), false);
 });
 
+test('renders Simplified Chinese HTML, SVG, controls, and summaries without changing report data', () => {
+  const root = makeRepository();
+  git(root, ['checkout', '-b', 'private-chinese-branch']);
+  write(root, 'src/auth/session.ts', '// TODO verify session\nexport const ready = true;\n');
+  const report = analyzeRepository({ repository: root }).report;
+  report.verification.results = [
+    { label: 'BUILD', status: 'passed' },
+    { label: 'TEST', status: 'failed' },
+  ];
+  report.verification.availability.TYPES = true;
+  const before = JSON.stringify(report);
+  const html = renderHtml(report, { mode: 'safe', locale: 'zh-CN' });
+  const detailed = renderHtml(report, { mode: 'detailed', locale: 'zh-CN' });
+  const views = renderViews(report, { locale: 'zh-CN' });
+
+  assert.match(html, /<html lang="zh-CN">/);
+  assert.match(html, /代码改动事实/);
+  assert.match(html, /改动规模/);
+  assert.match(html, /验证结果/);
+  assert.match(html, /下载 PNG/);
+  assert.match(html, /复制摘要/);
+  assert.match(html, /font-family: "VibeLabel CJK"/);
+  assert.match(html, /data-state="PASS">通过/);
+  assert.match(html, /data-state="FAIL">失败/);
+  assert.match(html, /data-state="NOT_RUN">未运行/);
+  assert.match(views.safe.summary, /敏感区域:/);
+  assert.match(views.safe.summary, /本地分析 · 指纹/);
+  assert.equal(html.includes(path.basename(root)), false);
+  assert.equal(html.includes('private-chinese-branch'), false);
+  assert.equal(detailed.includes(path.basename(root)), true);
+  assert.equal(detailed.includes('private-chinese-branch'), true);
+  assert.equal(JSON.stringify(report), before);
+});
+
+test('language composition folds analyzer Other into one localized remainder row', () => {
+  const root = makeRepository();
+  write(root, 'src/app.ts', 'export const value = 1;\n');
+  const report = analyzeRepository({ repository: root }).report;
+  report.summary.languages = [
+    { name: 'JavaScript', percent: 40 },
+    { name: 'Other', percent: 30 },
+    { name: 'CSS', percent: 20 },
+    { name: 'HTML', percent: 10 },
+  ];
+  assert.deepEqual(renderViews(report).safe.languages.map((item) => item.name), ['JavaScript', 'CSS', 'HTML', 'Other']);
+  assert.deepEqual(renderViews(report, { locale: 'zh-CN' }).safe.languages.map((item) => item.name), ['JavaScript', 'CSS', 'HTML', '其他']);
+});
+
 test('safe base labels omit the base ref', () => {
   const root = makeRepository();
   write(root, 'src/app.ts', 'base\n');
@@ -190,6 +276,30 @@ test('CLI writes report and HTML to an explicit output directory', () => {
   if (process.platform !== 'win32') assert.equal(statSync(path.join(output, 'report.json')).mode & 0o777, 0o600);
 });
 
+test('CLI writes Chinese presentation files and keeps default locale outputs separate', () => {
+  const root = makeRepository();
+  const output = path.join(mkdtempSync(path.join(os.tmpdir(), 'vibe-label-output-')), 'zh');
+  write(root, 'src/app.ts', 'export const value = 1;\n');
+  const cli = path.resolve('plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs');
+  const localizedStdout = execFileSync(process.execPath, [
+    cli, '--repo', root, '--output', output, '--lang', 'zh-CN',
+  ], { encoding: 'utf8' });
+  const html = readFileSync(path.join(output, 'index.html'), 'utf8');
+  const report = JSON.parse(readFileSync(path.join(output, 'report.json'), 'utf8'));
+  assert.match(localizedStdout, /范围:\s+当前改动/);
+  assert.match(localizedStdout, /安全版:/);
+  assert.match(html, /<html lang="zh-CN">/);
+  assert.match(html, /仓库已隐藏/);
+  assert.equal(report.presentation, undefined);
+
+  const englishStdout = execFileSync(process.execPath, [cli, '--repo', root], { encoding: 'utf8' });
+  const chineseStdout = execFileSync(process.execPath, [cli, '--repo', root, '--lang', 'zh'], { encoding: 'utf8' });
+  const englishPath = /^HTML:\s+(.+)$/m.exec(englishStdout)?.[1];
+  const chinesePath = /^安全版:\s+(.+)$/m.exec(chineseStdout)?.[1];
+  assert.ok(englishPath);
+  assert.equal(path.dirname(chinesePath), path.join(path.dirname(englishPath), 'zh-CN'));
+});
+
 test('CLI JSON output stays machine-readable when verification commands run', () => {
   const root = makeRepository();
   write(root, 'src/app.ts', 'export const value = 1;\n');
@@ -198,6 +308,7 @@ test('CLI JSON output stays machine-readable when verification commands run', ()
     cli,
     '--repo', root,
     '--check', `BUILD=${process.execPath} --version`,
+    '--lang', 'zh-CN',
     '--json',
   ], { encoding: 'utf8' });
   const report = JSON.parse(stdout);

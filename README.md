@@ -1,5 +1,7 @@
 # VibeLabel
 
+[简体中文](./README.zh-CN.md)
+
 **Code change facts, not a quality score.**
 
 VibeLabel turns a local Git diff into a shareable 4:5 code-change label. It reports what can be verified directly from the repository: changed lines, files, language composition, direct dependency changes, test-file changes, executed checks, sensitive areas, and explicit patterns on added lines.
@@ -10,7 +12,7 @@ It does not upload source code, guess whether code is AI-written, or assign a he
 
 ## Quick Start
 
-Requirements: Git and Node.js 20 or newer. After this GitHub repository is published, run VibeLabel from any local Git repository with one command:
+Requirements: Git and Node.js 20 or newer. Run VibeLabel from any local Git repository with one command:
 
 ```bash
 npx --yes github:NeoXu954/vibe-label --repo . --current --open
@@ -25,6 +27,16 @@ node plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs --repo /path/to
 ```
 
 The generated safe page can download a `1080 x 1350` PNG or copy a text summary. It links to a separate local `detailed.html` when repository labels are needed. The default output lives in the operating system's temporary directory, so VibeLabel does not add files to the analyzed repository.
+
+## Languages
+
+English is the default. Add `--lang zh-CN` for a Simplified Chinese HTML page, PNG, interface, and copied summary:
+
+```bash
+npx --yes github:NeoXu954/vibe-label --repo . --current --lang zh-CN --open
+```
+
+Language is presentation-only. `report.json`, rule IDs, and the analysis fingerprint remain language-neutral. For the same diff, default English output keeps its existing temporary path and Chinese output is written below its `zh-CN/` subdirectory. An explicit `--output` path is used as provided.
 
 ## Scopes
 
@@ -53,8 +65,6 @@ node plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs \
 Checks run before analysis. A failed check remains visible on the generated label and makes the CLI exit with status `2`.
 
 ## Codex Plugin
-
-After this repository is published:
 
 ```bash
 codex plugin marketplace add NeoXu954/vibe-label
@@ -121,6 +131,7 @@ Useful options:
 --output <path>        Persistent output directory
 --check <LABEL=CMD>    Run a named verification command; repeatable
 --check-timeout <ms>   Timeout per check
+--lang <locale>        Presentation language: en or zh-CN
 --open                 Open the generated HTML
 --json                 Print the machine report
 ```
@@ -132,12 +143,6 @@ npm test
 npm run check
 ```
 
-The project uses only Node.js built-in modules at runtime. Geist Sans and Geist Mono are bundled under the SIL Open Font License in [`assets/fonts`](./plugins/vibe-label/skills/vibe-label/assets/fonts/).
+The project uses only Node.js built-in modules at runtime. Geist Sans, Geist Mono, and a fixed-UI subset of Noto Sans SC are bundled under the SIL Open Font License in [`assets/fonts`](./plugins/vibe-label/skills/vibe-label/assets/fonts/). The subset guarantees VibeLabel's own Chinese interface text; uncommon characters in detailed repository or branch names use the local system fallback.
 
 VibeLabel's source code is available under the [MIT License](./LICENSE).
-
-## 中文说明
-
-VibeLabel 是一个完全本地运行的 Codex / Claude Code 辅助工具。它把当前 Git 改动生成一张可分享的“代码配料表”，但不做 AI 代码检测、不打质量分，也不会上传源码。
-
-默认生成的 `index.html` 不会嵌入仓库名、分支名或基准分支名；`detailed.html` 是单独的本地详细版。分享 PNG 或 HTML 前，仍建议先目视检查。`report.json` 含相对文件路径和依赖名，只用于本地分析，不应直接公开。

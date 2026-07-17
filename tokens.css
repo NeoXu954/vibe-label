@@ -16,9 +16,9 @@
   --color-focus: oklch(48% 0.180 245);
   --color-backdrop: oklch(88% 0.012 85);
 
-  --font-display: "Geist Sans", ui-sans-serif, sans-serif;
-  --font-body: "Geist Sans", ui-sans-serif, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-display: "Geist Sans", "VibeLabel CJK", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", ui-sans-serif, sans-serif;
+  --font-body: "Geist Sans", "VibeLabel CJK", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", ui-sans-serif, sans-serif;
+  --font-mono: "Geist Mono", "VibeLabel CJK", "SFMono-Regular", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", ui-monospace, monospace;
 
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;

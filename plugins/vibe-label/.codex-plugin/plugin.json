@@ -1,7 +1,7 @@
 {
   "name": "vibe-label",
-  "version": "0.1.0",
-  "description": "Generate a factual, shareable code-change label from a local Git diff.",
+  "version": "0.2.0",
+  "description": "Generate a factual code-change label in English or Simplified Chinese from a local Git diff.",
   "homepage": "https://github.com/NeoXu954/vibe-label",
   "repository": "https://github.com/NeoXu954/vibe-label",
   "license": "MIT",
@@ -12,14 +12,14 @@
   "interface": {
     "displayName": "VibeLabel",
     "shortDescription": "Turn a Git diff into a shareable code label.",
-    "longDescription": "Summarizes verifiable change facts, direct dependency changes, checks, sensitive areas, and added-line patterns without uploading source code.",
+    "longDescription": "Creates English or Simplified Chinese labels with verifiable change facts, checks, sensitive areas, and added-line patterns without uploading source code.",
     "developerName": "NeoXu954",
     "category": "Developer Tools",
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
       "Generate a safe VibeLabel for my current Git changes.",
       "Create a VibeLabel for my staged changes.",
-      "Compare this branch to main with a VibeLabel."
+      "为当前改动生成一张中文 VibeLabel。"
     ]
   }
 }

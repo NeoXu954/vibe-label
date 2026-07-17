@@ -1,7 +1,7 @@
 {
   "name": "vibe-label",
-  "version": "0.1.0",
-  "description": "Generate a factual, shareable code-change label from a Git diff.",
+  "version": "0.2.0",
+  "description": "Generate a factual, shareable code-change label in English or Simplified Chinese from a Git diff.",
   "author": "NeoXu954",
   "license": "MIT",
   "type": "module",
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/git.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/analyze.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/render.mjs",
+    "check": "node --check plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/git.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/analyze.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/i18n.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/render.mjs",
     "demo": "node plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs --current --open"
   },
   "engines": {
@@ -31,6 +31,7 @@
     "LICENSE",
     "plugins/vibe-label/",
     "README.md",
+    "README.zh-CN.md",
     "tokens.css"
   ],
   "keywords": [
