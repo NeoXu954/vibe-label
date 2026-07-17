@@ -1,0 +1,20 @@
+{
+  "name": "vibe-label",
+  "interface": {
+    "displayName": "VibeLabel"
+  },
+  "plugins": [
+    {
+      "name": "vibe-label",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibe-label"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

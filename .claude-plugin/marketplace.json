@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "vibe-label",
+  "description": "VibeLabel plugins for Claude Code",
+  "owner": {
+    "name": "NeoXu954"
+  },
+  "plugins": [
+    {
+      "name": "vibe-label",
+      "source": "./plugins/vibe-label",
+      "description": "Generate a factual, shareable code-change label from a local Git diff.",
+      "author": {
+        "name": "NeoXu954"
+      },
+      "category": "development"
+    }
+  ]
+}

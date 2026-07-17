@@ -1,0 +1,43 @@
+{
+  "name": "vibe-label",
+  "version": "0.1.0",
+  "description": "Generate a factual, shareable code-change label from a Git diff.",
+  "author": "NeoXu954",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "vibe-label": "plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NeoXu954/vibe-label.git"
+  },
+  "homepage": "https://github.com/NeoXu954/vibe-label#readme",
+  "bugs": {
+    "url": "https://github.com/NeoXu954/vibe-label/issues"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/git.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/analyze.mjs && node --check plugins/vibe-label/skills/vibe-label/scripts/lib/render.mjs",
+    "demo": "node plugins/vibe-label/skills/vibe-label/scripts/vibe-label.mjs --current --open"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    ".agents/",
+    ".claude-plugin/",
+    "docs/",
+    "LICENSE",
+    "plugins/vibe-label/",
+    "README.md",
+    "tokens.css"
+  ],
+  "keywords": [
+    "codex",
+    "claude-code",
+    "git-diff",
+    "agent-skill",
+    "developer-tools"
+  ]
+}

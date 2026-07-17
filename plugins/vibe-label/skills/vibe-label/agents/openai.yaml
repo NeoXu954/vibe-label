@@ -1,0 +1,4 @@
+interface:
+  display_name: "VibeLabel"
+  short_description: "Generate a factual share card for the current diff"
+  default_prompt: "Use $vibe-label to generate a local code ingredients label for the current Git diff."

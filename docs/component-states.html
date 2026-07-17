@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VibeLabel action states</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="../plugins/vibe-label/skills/vibe-label/assets/label.css" />
+  <style>
+    @font-face {
+      font-family: "Geist Sans";
+      src: url(../plugins/vibe-label/skills/vibe-label/assets/fonts/Geist-Variable.woff2) format("woff2");
+      font-weight: 100 900;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url(../plugins/vibe-label/skills/vibe-label/assets/fonts/GeistMono-Variable.woff2) format("woff2");
+      font-weight: 100 900;
+    }
+    .state-preview {
+      width: min(100%, 42rem);
+      margin-inline: auto;
+      display: grid;
+      gap: var(--space-sm);
+      padding: var(--space-lg);
+      background: var(--color-paper);
+      border: var(--rule-heavy) solid var(--color-rule);
+    }
+    .state-preview h1 {
+      margin: 0 0 var(--space-md);
+      font-size: var(--text-2xl);
+    }
+    .state-row {
+      display: grid;
+      grid-template-columns: 6rem minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .state-row > span {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+    }
+  </style>
+</head>
+<body>
+  <main class="state-preview">
+    <h1>Action button states</h1>
+    <div class="state-row"><span>default</span><button class="action action--primary" type="button"><span aria-hidden="true">↓</span>Download PNG</button></div>
+    <div class="state-row"><span>hover</span><button class="action action--primary is-hover" type="button"><span aria-hidden="true">↓</span>Download PNG</button></div>
+    <div class="state-row"><span>focus</span><button class="action action--primary is-focus" type="button"><span aria-hidden="true">↓</span>Download PNG</button></div>
+    <div class="state-row"><span>active</span><button class="action action--primary is-active" type="button"><span aria-hidden="true">↓</span>Download PNG</button></div>
+    <div class="state-row"><span>disabled</span><button class="action action--primary" type="button" disabled><span aria-hidden="true">↓</span>Download PNG</button></div>
+    <div class="state-row"><span>loading</span><button class="action action--primary" type="button" data-state="loading" disabled><span class="action__icon" aria-hidden="true">◌</span>Generating</button></div>
+    <div class="state-row"><span>error</span><button class="action" type="button" data-state="error"><span aria-hidden="true">!</span>Try export again</button></div>
+    <div class="state-row"><span>success</span><button class="action" type="button" data-state="success"><span aria-hidden="true">✓</span>Downloaded</button></div>
+  </main>
+</body>
+</html>

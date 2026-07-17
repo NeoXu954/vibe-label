@@ -1,0 +1,15 @@
+{
+  "name": "vibe-label",
+  "version": "0.1.0",
+  "description": "Generate a factual, shareable code-change label from a local Git diff.",
+  "author": {
+    "name": "NeoXu954"
+  },
+  "keywords": [
+    "git",
+    "diff",
+    "code-review",
+    "developer-tools"
+  ],
+  "skills": "./skills/"
+}
